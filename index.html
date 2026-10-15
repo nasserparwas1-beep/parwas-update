@@ -444,6 +444,8 @@
 "use strict";
 /* ============ PARWAS Web Player v3 — wie die App ============ */
 var LS="parwas_web_v3";
+/* Eingebettete Playlist (wird beim Erzeugen gefuellt -> eine einzige Datei, keine CORS) */
+var EMBEDDED_PLAYLIST = "";
 var S={profiles:[],activeId:null,engine:"hls",lang:"de",view:"home",
   liveCats:[],liveStreams:[],vodCats:[],vodStreams:[],serCats:[],serList:[],
   favs:{},selCat:{live:"__all",vod:"__all",ser:"__all"},hls:null,mpegts:null,cur:null,aspect:0};
@@ -528,6 +530,16 @@ function loadProfile(p){
 load();
 setTimeout(function(){
   $("splash").classList.add("hidden");
+  if(EMBEDDED_PLAYLIST && EMBEDDED_PLAYLIST.length>20){
+    try{
+      parseM3uText(EMBEDDED_PLAYLIST);
+      var ep=S.profiles.filter(function(p){return p.id==="p-embedded";})[0];
+      if(!ep){ep={id:"p-embedded",type:"m3u",name:"PARWAS",m3u:"",epg:"",m3uText:EMBEDDED_PLAYLIST};S.profiles.unshift(ep);}
+      S.activeId="p-embedded";save();
+      var ui=document.getElementById("pName"); if(ui)ui.value="PARWAS";
+      startApp(); return;
+    }catch(e){}
+  }
   if(!S.profiles.length){openAdd("xtream",true);}
   else{ startApp(); }
 },1500);
